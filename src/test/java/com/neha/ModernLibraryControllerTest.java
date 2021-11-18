@@ -1,11 +1,10 @@
 package com.neha;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.mockito.BDDMockito.given;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import java.util.ArrayList;
 import java.util.List;
 import org.assertj.core.api.Assertions;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,6 +18,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.neha.model.Book;
 import com.neha.repository.BookRepository;
 import com.neha.service.ModernLibraryService;
+import com.neha.util.UnitTestUtil;
 
 
 @RunWith(SpringRunner.class)
@@ -28,6 +28,12 @@ public class ModernLibraryControllerTest {
     @MockBean BookRepository bookRepository;
 
     @MockBean ModernLibraryService libraryService;
+    UnitTestUtil util;
+
+    @Before
+    public void setUp() {
+        util = new UnitTestUtil();
+    }
 
     @Test
     public void getBooks_Should_Return_Books() throws Exception {
@@ -37,13 +43,19 @@ public class ModernLibraryControllerTest {
             add(new Book(2l, "B", 1));
             add(new Book(3l, "C", 6));
         }});
-        MvcResult result = this.mockMvc.perform(get("/books"))
-                .andExpect(status().isOk())
-                .andReturn();
+        MvcResult result = util.getOperation(mockMvc, "books");
         ObjectMapper mapper = new ObjectMapper();
         List<Book> actual = mapper.readValue(result.getResponse().getContentAsString(),
                 new TypeReference<List<Book>>() {
                 });
         Assertions.assertThat(actual.get(1).getTitle()).isEqualTo("B");
+    }
+
+    @Test
+    public void getAllBooks_Should_Return_Empty() throws Exception {
+
+        given(libraryService.getALlBooks()).willReturn(new ArrayList<Book>());
+        MvcResult result = util.getOperation(mockMvc, "books");
+        Assertions.assertThat(result.getResponse().getContentAsString()).isEqualTo("Empty Library");
     }
 }

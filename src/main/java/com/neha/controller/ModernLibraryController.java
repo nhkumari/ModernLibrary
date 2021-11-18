@@ -12,6 +12,7 @@ import com.neha.service.ModernLibraryService;
 
 
 @RestController
+@RequestMapping(value="/v1/modernlibrary")
 public class ModernLibraryController {
     @Autowired
     private ModernLibraryService service;
