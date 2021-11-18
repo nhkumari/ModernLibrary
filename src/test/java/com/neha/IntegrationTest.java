@@ -18,11 +18,11 @@ public class IntegrationTest {
 
     @Autowired
     private TestRestTemplate restTemplate;
-
+    private static String url = "/v1/modernlibrary";
     @Test
     public void callBooksEndPoint() {
         ResponseEntity<String> response;
-        response = restTemplate.getForEntity("/books", String.class);
+        response = restTemplate.getForEntity(url+"/books", String.class);
         Assertions.assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         Assertions.assertThat(response.getBody()).contains("Champak");
     }
