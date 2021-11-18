@@ -39,9 +39,9 @@ public class ModernLibraryControllerTest {
     public void getBooks_Should_Return_Books() throws Exception {
 
         given(libraryService.getALlBooks()).willReturn(new ArrayList<Book>() {{
-            add(new Book(1l, "A", 2));
-            add(new Book(2l, "B", 1));
-            add(new Book(3l, "C", 6));
+            add(new Book(1l, "A"));
+            add(new Book(2l, "B"));
+            add(new Book(3l, "C"));
         }});
         MvcResult result = util.getOperation(mockMvc, "books");
         ObjectMapper mapper = new ObjectMapper();
