@@ -50,6 +50,26 @@ public class ModernLibraryController {
         return new ResponseEntity<>("invalid data", HttpStatus.BAD_REQUEST);
     }
 
+    @RequestMapping(method = RequestMethod.GET, value = "/borrow_copy/{user_id}/{isbn}")
+    public ResponseEntity<Object> borrowACopy(@PathVariable("user_id") long userId,
+            @PathVariable("isbn") String isbn) {
+        ResponseEntity<Object> rs = null;
+
+        Optional<User> user = service.findUser(userId);
+        List<Book> copies = service.findALlAvailableCopies(isbn);
+        if (user.isPresent() && !copies.isEmpty()) {
+            List<Book> bookList = service.findAssignedCopies(userId, isbn);
+            if (!bookList.isEmpty()) {
+                return new ResponseEntity<>("user already has the book", HttpStatus.FORBIDDEN);
+            }
+            rs = assignBook(copies.get(0), user.get());
+
+            return rs;
+
+        }
+        return new ResponseEntity<>("invalid data/book is not available", HttpStatus.BAD_REQUEST);
+    }
+
     private ResponseEntity<Object> assignBook(Book book, User user) {
         List<Book> bookList = service.findBooksByUserId(user.getId());
         if (bookList.isEmpty()) {
