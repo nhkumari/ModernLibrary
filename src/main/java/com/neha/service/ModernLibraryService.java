@@ -41,4 +41,12 @@ public class ModernLibraryService {
         return bookRepository.findByUser_Id(userId);
     }
 
+    public List<Book> findALlAvailableCopies(String isbn) {
+        return bookRepository.findByIsbnAndUser_IdIsNull(isbn);
+    }
+
+    public List<Book> findAssignedCopies(long userId, String isbn) {
+        return bookRepository.findByUser_IdAndIsbn(userId, isbn);
+    }
+
 }
