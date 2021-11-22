@@ -211,4 +211,81 @@ public class ModernLibraryControllerTest {
         Assertions.assertThat(actual.getBookList().size()).isEqualTo(1);
         Assertions.assertThat(actual.getBookList().get(0).getTitle()).isEqualTo("Bhagwat Gita");
     }
+
+    @Test
+    public void testReturnBooksWhenInvalidUser() throws Exception {
+        MvcResult result = util.postOperation(mockMvc, "return_books/11", status().isBadRequest(), new ArrayList() {{
+            add("123");
+        }});
+        Assertions.assertThat(result.getResponse().getContentAsString()).isEqualTo("requested user doesn't exists");
+    }
+
+    @Test
+    public void testReturnBooksInvalidBook() throws Exception {
+        User user = new User(11, "Ravi", "Sharma", null);
+        given(libraryService.findUser(11)).willReturn(Optional.of(user));
+        given(libraryService.findAssignedCopies(11, "111-CC-1")).willReturn(new ArrayList<Book>() {{
+            add(new Book(111, "111-CC-1", "Golden Tales", user));
+        }});
+        given(libraryService.findAssignedCopies(11, "333-EE-3")).willReturn(Collections.emptyList());
+        MvcResult result = util.postOperation(mockMvc, "return_books/11", status().isBadRequest(), new ArrayList() {{
+            add("111-CC-1");
+            add("333-EE-3");
+        }});
+
+        Assertions.assertThat(result.getResponse().getContentAsString())
+                .isEqualTo("couldn't perform operation, book with isbn: 333-EE-3, is not assigned to requested user");
+    }
+
+    @Test
+    public void testReturnSingleBookFromBorrowList() throws Exception {
+        User user = new User(3, "Neha", "Kumari", null);
+        Book bookToReturn = new Book(888, "888-DD-8", "Happy World", user);
+        given(libraryService.findUser(3)).willReturn(Optional.of(user));
+        given(libraryService.findAssignedCopies(3, "888-DD-8")).willReturn(new ArrayList<Book>() {{
+            add(bookToReturn);
+        }});
+        given(libraryService.findBooksByUserId(3)).willReturn(new ArrayList<Book>() {{
+            add(bookToReturn);
+            add(new Book(666, "666-NY-6", "Ranchi Days", user));
+        }});
+
+        MvcResult result = util.postOperation(mockMvc, "return_books/3", status().isOk(), new ArrayList() {{
+            add("888-DD-8");
+        }});
+        ObjectMapper mapper = new ObjectMapper();
+        User actual = mapper.readValue(result.getResponse().getContentAsString(),
+                new TypeReference<User>() {
+                });
+        Assertions.assertThat(actual.getBookList().size()).isEqualTo(1);
+        Assertions.assertThat(actual.getBookList().get(0).getTitle()).isEqualTo("Ranchi Days");
+    }
+
+    @Test
+    public void testReturnMultipleBooksFromBorrowList() throws Exception {
+        User user = new User(1, "Simran", "Singh", null);
+        Book bookToReturn1 = new Book(888, "888-DD-8", "Happy World", user);
+        Book bookToReturn2 = new Book(666, "666-NY-6", "Ranchi Days", user);
+        given(libraryService.findUser(1)).willReturn(Optional.of(user));
+        given(libraryService.findAssignedCopies(1, "888-DD-8")).willReturn(new ArrayList<Book>() {{
+            add(bookToReturn1);
+        }});
+        given(libraryService.findAssignedCopies(1, "666-NY-6")).willReturn(new ArrayList<Book>() {{
+            add(bookToReturn2);
+        }});
+        given(libraryService.findBooksByUserId(1)).willReturn(new ArrayList<Book>() {{
+            add(bookToReturn1);
+            add(bookToReturn2);
+        }});
+
+        MvcResult result = util.postOperation(mockMvc, "return_books/1", status().isOk(), new ArrayList() {{
+            add("666-NY-6");
+            add("888-DD-8");
+        }});
+        ObjectMapper mapper = new ObjectMapper();
+        User actual = mapper.readValue(result.getResponse().getContentAsString(),
+                new TypeReference<User>() {
+                });
+        Assertions.assertThat(actual.getBookList().size()).isEqualTo(0);
+    }
 }

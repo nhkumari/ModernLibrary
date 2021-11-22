@@ -1,0 +1,20 @@
+Design  Decisions
+ALl user stories are assumed that they have a jira ticket as below
+User Story -1 :   DTPZN-1
+User Story -2 :   DTPZN-2
+User Story -3 :   DTPZN-3
+User Story -4 :   DTPZN-4
+
+Each API dedicated for a user story will contain both part-1 and part-2 of the user story
+User Story -1 (GET API-"/books")
+Library will always show books those are not assigned to any user.
+User Story -2 (GET API-"/borrow/{user_id}/{book_id}")
+When user borrows a book, then user is added to the book and removing the book from the library,is achieved by not showing any user assigned books in the list of all available books.
+So, the book will be always there in the database , but view books will show all available books to borrow.
+User Story -3 (GET API-"/borrow_copy/{user_id}/{isbn}")
+same assumption like user story 2, about removing a book from library, plus copies of books are stored by introducing ISBN , all copies will have same ISBN .
+User Story -4 (POST API- "/return_books/{user_id}")
+same assumption like user story 2, about removing a book from library.
+
+TBL_MODERN_BOOK.png shows a view of the book table
+TBL_MODERN_USER.png shows a view of the user table
